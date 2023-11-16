@@ -1,0 +1,29 @@
+logs:
+  - name: root
+    level: info
+    appender:
+      - type: FileLogAppender
+        file: log.txt
+      - type: StdoutLogAppender
+  
+system:
+    port: 9900
+    value: 15
+    int_vec: 
+      - 11
+      - 22
+    int_set:
+      - 34
+      - 35
+      - 11
+    int_unordered_set:
+      - 33
+      - 55
+      - 22
+    int_map: {"hello_2": 12, "hello_3": 13, "hello_1": 14 }
+
+test:
+  - 40
+  - 50
+  - 68
+  - 79

@@ -83,6 +83,100 @@ void test_vector_to_string()
     }
 }
 
+void test_list_to_string()
+{
+    sylar::ConfigVar<std::list<int>>::ptr g_int_vec_value_config =
+        sylar::Config::Lookup("test", std::list<int>{1, 2}, "system int vec");
+
+    YAML::Node root = YAML::LoadFile("/root/c_plus_plus_project/sylar/bin/conf/log.yaml");
+    // 从yaml文件加载到ConfigVarMap s_datas中
+    sylar::Config::LoadFromYaml(root);
+
+    auto v = g_int_vec_value_config->getValue();
+    for (auto i : v)
+    {
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << i;
+    }
+}
+
+void test_set_to_int()
+{
+    std::set<int> s;
+    s.insert(1);
+    s.insert(2);
+    sylar::ConfigVar<std::set<int>>::ptr g_int_set_value_config =
+        sylar::Config::Lookup("system.int_set", s, "system int set");
+
+    YAML::Node root = YAML::LoadFile("/root/c_plus_plus_project/sylar/bin/conf/log.yaml");
+    // 从yaml文件加载到ConfigVarMap s_datas中
+    sylar::Config::LoadFromYaml(root);
+
+    auto v = g_int_set_value_config->getValue();
+    for (auto i : v)
+    {
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << i;
+    }
+}
+
+void test_unordered_set_to_int()
+{
+    std::unordered_set<int> s;
+    s.insert(1);
+    s.insert(2);
+    sylar::ConfigVar<std::unordered_set<int>>::ptr g_int_unordered_set_value_config =
+        sylar::Config::Lookup("system.int_unordered_set", s, "system int unordered_set");
+
+    YAML::Node root = YAML::LoadFile("/root/c_plus_plus_project/sylar/bin/conf/log.yaml");
+    // 从yaml文件加载到ConfigVarMap s_datas中
+    sylar::Config::LoadFromYaml(root);
+
+    auto v = g_int_unordered_set_value_config->getValue();
+    for (auto i : v)
+    {
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << i;
+    }
+}
+
+void test_map_to_int()
+{
+    std::map<std::string, int> s;
+    s["key"] = 10;
+    sylar::ConfigVar<std::map<std::string, int>>::ptr g_int_unordered_set_value_config =
+        sylar::Config::Lookup("system.int_map", s, "system int map");
+
+    YAML::Node root = YAML::LoadFile("/root/c_plus_plus_project/sylar/bin/conf/log.yaml");
+    // 从yaml文件加载到ConfigVarMap s_datas中
+    sylar::Config::LoadFromYaml(root);
+
+    std::map<std::string, int> v = g_int_unordered_set_value_config->getValue();
+    std::map<std::string, int>::iterator it;
+    for (it = v.begin(); it != v.end(); it++)
+    {
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << it->first << " " << it->second;
+    }
+}
+
+void test_unordered_map_to_int()
+{
+    std::unordered_map<std::string, int> s;
+    s["key"] = 10;
+    sylar::ConfigVar<std::unordered_map<std::string, int>>::ptr g_int_unordered_map_value_config =
+        sylar::Config::Lookup("system.int_map", s, "system int map");
+
+    YAML::Node root = YAML::LoadFile("/root/c_plus_plus_project/sylar/bin/conf/log.yaml");
+    // 从yaml文件加载到ConfigVarMap s_datas中
+    sylar::Config::LoadFromYaml(root);
+
+    std::unordered_map<std::string, int> v = g_int_unordered_map_value_config->getValue();
+    std::unordered_map<std::string, int>::iterator it;
+    for (it = v.begin(); it != v.end(); it++)
+    {
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << it->first << " " << it->second;
+    }
+}
+
+//
+
 int main()
 {
     std::cout << "hello world" << std::endl;
@@ -111,7 +205,12 @@ int main()
 
     // test_config(g_int_value_config);
 
-    test_vector_to_string();
+    // test_vector_to_string();
+    // test_list_to_string();
+    // test_set_to_int();
+    // test_unordered_set_to_int();
+    // test_map_to_int();
+    test_unordered_map_to_int();
 
     return 0;
 }

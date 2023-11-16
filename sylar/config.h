@@ -4,7 +4,12 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <list>
 #include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <boost/lexical_cast.hpp>
 #include <yaml-cpp/yaml.h>
 #include "log.h"
@@ -72,6 +77,8 @@ namespace sylar
         }
     };
 
+    // ***************vector start****************
+
     /**
      * 数据类型转换-vector偏特化版本
      * string -> vector<T>
@@ -119,6 +126,264 @@ namespace sylar
             return ss.str();
         }
     };
+
+    // ***************vector end****************
+
+    // ***************list start****************
+
+    /**
+     * 数据类型转换-list偏特化版本
+     * string -> list<T>
+     */
+    template <class T>
+    class LexicalCast<std::string, std::list<T>>
+    {
+    public:
+        std::list<T> operator()(const std::string &v)
+        {
+            // loads the input string as a single YAML document
+            YAML::Node node = YAML::Load(v);
+            typename std::list<T> vec;
+            std::stringstream ss;
+            for (size_t i = 0; i < node.size(); i++)
+            {
+                ss.str(""); // 字符流置为空
+                ss << node[i];
+                // node[i]为一个基本类型string，需要将string转为T类型
+                vec.push_back(LexicalCast<std::string, T>()(ss.str()));
+            }
+            return vec;
+        }
+    };
+
+    /**
+     * 数据类型转换-list偏特化版本
+     * list<T> -> string
+     */
+    template <class T>
+    class LexicalCast<std::list<T>, std::string>
+    {
+    public:
+        std::string operator()(const std::list<T> &v)
+        {
+            YAML::Node node;
+            // 将list中的每一个元素变为yaml结点
+            for (auto &i : v)
+            {
+                // list[i] 可能不是单个Scaler，所以需要进行YAML::Load
+                node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
+            }
+            std::stringstream ss;
+            ss << node;
+            return ss.str();
+        }
+    };
+
+    // ***************list end****************
+
+    // ***************set start****************
+
+    /**
+     * 数据类型转换-set偏特化版本
+     * string -> set<T>
+     */
+    template <class T>
+    class LexicalCast<std::string, std::set<T>>
+    {
+    public:
+        std::set<T> operator()(const std::string &v)
+        {
+            // loads the input string as a single YAML document
+            YAML::Node node = YAML::Load(v);
+            typename std::set<T> vec;
+            std::stringstream ss;
+            for (size_t i = 0; i < node.size(); i++)
+            {
+                ss.str(""); // 字符流置为空
+                ss << node[i];
+                // node[i]为一个基本类型string，需要将string转为T类型
+                vec.insert(LexicalCast<std::string, T>()(ss.str()));
+            }
+            return vec;
+        }
+    };
+
+    /**
+     * 数据类型转换-set偏特化版本
+     * set<T> -> string
+     */
+    template <class T>
+    class LexicalCast<std::set<T>, std::string>
+    {
+    public:
+        std::string operator()(const std::set<T> &v)
+        {
+            YAML::Node node;
+            // 将set中的每一个元素变为yaml结点
+            for (auto &i : v)
+            {
+                // set[i] 可能不是单个Scaler，所以需要进行YAML::Load
+                node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
+            }
+            std::stringstream ss;
+            ss << node;
+            return ss.str();
+        }
+    };
+
+    // ***************set end****************
+
+    // ***************unordered_set start****************
+
+    /**
+     * 数据类型转换-unordered_set偏特化版本
+     * string -> unordered_set<T>
+     */
+    template <class T>
+    class LexicalCast<std::string, std::unordered_set<T>>
+    {
+    public:
+        std::unordered_set<T> operator()(const std::string &v)
+        {
+            // loads the input string as a single YAML document
+            YAML::Node node = YAML::Load(v);
+            typename std::unordered_set<T> vec;
+            std::stringstream ss;
+            for (size_t i = 0; i < node.size(); i++)
+            {
+                ss.str(""); // 字符流置为空
+                ss << node[i];
+                // node[i]为一个基本类型string，需要将string转为T类型
+                vec.insert(LexicalCast<std::string, T>()(ss.str()));
+            }
+            return vec;
+        }
+    };
+
+    /**
+     * 数据类型转换-unordered_set偏特化版本
+     * unordered_set<T> -> string
+     */
+    template <class T>
+    class LexicalCast<std::unordered_set<T>, std::string>
+    {
+    public:
+        std::string operator()(const std::unordered_set<T> &v)
+        {
+            YAML::Node node;
+            // 将set中的每一个元素变为yaml结点
+            for (auto &i : v)
+            {
+                // set[i] 可能不是单个Scaler，所以需要进行YAML::Load
+                node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
+            }
+            std::stringstream ss;
+            ss << node;
+            return ss.str();
+        }
+    };
+
+    // ***************unordered_set end****************
+
+    // ***************map start****************
+
+    /**
+     * 数据类型转换-map偏特化版本
+     * string -> map<std::string,T>
+     */
+    template <class T>
+    class LexicalCast<std::string, std::map<std::string, T>>
+    {
+    public:
+        std::map<std::string, T> operator()(const std::string &v)
+        {
+            // loads the input string as a single YAML document
+            YAML::Node node = YAML::Load(v);
+            typename std::map<std::string, T> vec;
+            std::stringstream ss;
+            for (auto it = node.begin(); it != node.end(); it++)
+            {
+                ss.str(""); // 字符流置为空
+                ss << it->second;
+                vec.insert(std::make_pair(it->first.Scalar(), LexicalCast<std::string, T>()(ss.str())));
+            }
+            return vec;
+        }
+    };
+
+    /**
+     * 数据类型转换-map偏特化版本
+     * map<std::string,T> -> string
+     */
+    template <class T>
+    class LexicalCast<std::map<std::string, T>, std::string>
+    {
+    public:
+        std::string operator()(const std::map<std::string, T> &v)
+        {
+            YAML::Node node;
+            // 将set中的每一个元素变为yaml结点
+            for (auto it = v.begin(); it != v.end(); it++)
+            {
+                node[it->first] = YAML::Load(LexicalCast<T, std::string>()(it->second));
+            }
+            std::stringstream ss;
+            ss << node;
+            return ss.str();
+        }
+    };
+
+    // ***************map end****************
+
+    // ***************unordered_map start****************
+
+    /**
+     * 数据类型转换-unordered_map偏特化版本
+     * string -> unordered_map<std::string,T>
+     */
+    template <class T>
+    class LexicalCast<std::string, std::unordered_map<std::string, T>>
+    {
+    public:
+        std::unordered_map<std::string, T> operator()(const std::string &v)
+        {
+            // loads the input string as a single YAML document
+            YAML::Node node = YAML::Load(v);
+            typename std::unordered_map<std::string, T> vec;
+            std::stringstream ss;
+            for (auto it = node.begin(); it != node.end(); it++)
+            {
+                ss.str(""); // 字符流置为空
+                ss << it->second;
+                vec.insert(std::make_pair(it->first.Scalar(), LexicalCast<std::string, T>()(ss.str())));
+            }
+            return vec;
+        }
+    };
+
+    /**
+     * 数据类型转换-unordered_map偏特化版本
+     * unordered_map<std::string,T> -> string
+     */
+    template <class T>
+    class LexicalCast<std::unordered_map<std::string, T>, std::string>
+    {
+    public:
+        std::string operator()(const std::unordered_map<std::string, T> &v)
+        {
+            YAML::Node node;
+            // 将set中的每一个元素变为yaml结点
+            for (auto it = v.begin(); it != v.end(); it++)
+            {
+                node[it->first] = YAML::Load(LexicalCast<T, std::string>()(it->second));
+            }
+            std::stringstream ss;
+            ss << node;
+            return ss.str();
+        }
+    };
+
+    // ***************unordered_map end****************
 
     // 重写operator()方法
     // FromStr T& operator()(const std::string&)

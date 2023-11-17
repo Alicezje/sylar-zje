@@ -4,6 +4,42 @@
 #include "util.h"
 #include <yaml-cpp/yaml.h>
 
+void print_yaml(const YAML::Node &node, int level)
+{
+    /**
+     * node.Type()
+     * enum value { Undefined, Null, Scalar, Sequence, Map };
+     */
+    if (node.IsScalar())
+    {
+        std::cout << std::string(level * 4, ' ') << node.Scalar() << " - " << node.Type() << std::endl;
+    }
+    else if (node.IsNull())
+    {
+        std::cout << std::string(level * 4, ' ') << "NULL"
+                  << " - " << node.Type() << std::endl;
+    }
+    else if (node.IsMap())
+    {
+        // 如果类型为map还要继续向下遍历
+        for (auto it = node.begin(); it != node.end(); it++)
+        {
+            // 输出键和值的类型
+            std::cout << std::string(level * 4, ' ') << it->first << " - " << it->second.Type() << std::endl;
+            // 继续遍历值
+            print_yaml(it->second, level + 1);
+        }
+    }
+    else if (node.IsSequence())
+    {
+        for (size_t i = 0; i < node.size(); i++)
+        {
+            std::cout << std::string(level * 4, ' ') << i << " - " << node[i].Type() << std::endl;
+            print_yaml(node[i], level + 1);
+        }
+    }
+}
+
 void test_yaml()
 {
     // YAML::Node root = YAML::LoadFile("/root/c_plus_plus_project/sylar/bin/conf/log.yaml");
@@ -67,20 +103,22 @@ void test_config(sylar::ConfigVar<int>::ptr g_int_value_config)
 
 void test_vector_to_string()
 {
-    sylar::ConfigVar<std::vector<int>>::ptr g_int_vec_value_config =
-        sylar::Config::Lookup("test", std::vector<int>{1, 2}, "system int vec");
-
-    // sylar::ConfigVar<std::vector<int>>::ptr g_int_vec_value_config;
+    // sylar::ConfigVar<std::vector<int>>::ptr g_int_vec_value_config =
+    //     sylar::Config::Lookup("test", std::vector<int>{1, 2}, "system int vec");
 
     YAML::Node root = YAML::LoadFile("/root/c_plus_plus_project/sylar/bin/conf/log.yaml");
     // 从yaml文件加载到ConfigVarMap s_datas中
     sylar::Config::LoadFromYaml(root);
 
-    auto v = g_int_vec_value_config->getValue();
-    for (auto i : v)
-    {
-        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << i;
-    }
+    sylar::ConfigVar<std::vector<int>>::ptr g_int_vec_value_config =
+        sylar::Config::Lookup<std::vector<int>>("test");
+
+    // g_int_vec_value_config->getValue();
+    // auto v = g_int_vec_value_config->getValue();
+    // for (auto i : v)
+    // {
+    //     SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << i;
+    // }
 }
 
 void test_list_to_string()
@@ -175,7 +213,16 @@ void test_unordered_map_to_int()
     }
 }
 
-//
+void test_load_ListAllMember()
+{
+    YAML::Node root = YAML::LoadFile("/root/c_plus_plus_project/sylar/bin/conf/test.yaml");
+
+    // print_yaml(root, 0);
+    sylar::ConfigVar<int>::ptr g_int_vec_value_config =
+        sylar::Config::Lookup("user.number", 1, "user number");
+
+    sylar::Config::LoadFromYaml(root);
+}
 
 int main()
 {
@@ -210,7 +257,9 @@ int main()
     // test_set_to_int();
     // test_unordered_set_to_int();
     // test_map_to_int();
-    test_unordered_map_to_int();
+    // test_unordered_map_to_int();
+
+    test_load_ListAllMember();
 
     return 0;
 }

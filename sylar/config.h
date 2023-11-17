@@ -56,6 +56,8 @@ namespace sylar
          */
         virtual bool fromString(const std::string &val) = 0;
 
+        virtual std::string getTypeName() const = 0;
+
     protected:
         std::string m_name;        // 名称
         std::string m_description; // 描述
@@ -446,6 +448,11 @@ namespace sylar
             m_val = val;
         }
 
+        std::string getTypeName() const override
+        {
+            return typeid(T).name();
+        }
+
     private:
         T m_val; // 配置的值为value
     };
@@ -465,12 +472,27 @@ namespace sylar
                                                  const T &default_value,
                                                  const std::string &description = "")
         {
-            auto tmp = Lookup<T>(name); // 调用下面写好的函数
-            if (tmp)
+            auto it = s_datas.find(name); // 寻找是否存在key值
+            if (it != s_datas.end())
             {
-                SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "Lookup name=" << name << " exists";
-                return tmp;
+                // 查看类型是否相同
+                auto temp = std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
+                auto tmp = Lookup<T>(name); // 调用下面写好的函数
+                if (tmp)
+                {
+                    SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "Lookup name=" << name << " exists";
+                    return tmp;
+                }
+                else
+                {
+                    SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "Lookup name=" << name << " exists but type not"
+                                                      << typeid(T).name()
+                                                      << " real type" << it->second->getTypeName()
+                                                      << " " << it->second->toString();
+                    return nullptr;
+                }
             }
+
             // 如果没找到
             if (name.find_first_not_of("abcdefghijklmnopqrstuvwxyz._1234567890") != std::string::npos)
             {

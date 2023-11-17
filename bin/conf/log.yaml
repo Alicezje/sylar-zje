@@ -27,3 +27,9 @@ test:
   - 50
   - 68
   - 79
+
+class:
+    person:
+      name: zje
+      age: 31
+      sex: true

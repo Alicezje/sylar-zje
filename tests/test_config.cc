@@ -224,6 +224,81 @@ void test_load_ListAllMember()
     sylar::Config::LoadFromYaml(root);
 }
 
+class Person
+{
+public:
+    std::string m_name = "";
+    int m_age = 0;
+    bool m_sex = 0;
+
+    std::string toString() const
+    {
+        std::stringstream ss;
+        ss << "[Person name=" << m_name
+           << "age=" << m_age
+           << "sex=" << m_sex << "]";
+        return ss.str();
+    }
+};
+
+namespace sylar
+{
+    // ***************person start****************
+
+    /**
+     * 数据类型转换-person偏特化版本
+     * string -> person
+     */
+    template <>
+    class LexicalCast<std::string, Person>
+    {
+    public:
+        Person operator()(const std::string &v)
+        {
+            // loads the input string as a single YAML document
+            YAML::Node node = YAML::Load(v);
+            Person p;
+            p.m_name = node["name"].as<std::string>();
+            p.m_age = node["age"].as<int>();
+            p.m_sex = node["sex"].as<bool>();
+            return p;
+        }
+    };
+
+    /**
+     * 数据类型转换-Person偏特化版本
+     * Person -> string
+     */
+    template <>
+    class LexicalCast<Person, std::string>
+    {
+    public:
+        std::string operator()(const Person &v)
+        {
+            YAML::Node node;
+            node["name"] = v.m_name;
+            node["age"] = v.m_age;
+            node["sex"] = v.m_sex;
+            std::stringstream ss;
+            ss << node;
+            return ss.str();
+        }
+    };
+
+    // ***************person end****************
+}
+
+void test_class()
+{
+    sylar::ConfigVar<Person>::ptr g_person = sylar::Config::Lookup("class.person", Person(), "class person");
+
+    YAML::Node root = YAML::LoadFile("/root/c_plus_plus_project/sylar/bin/conf/log.yaml");
+    sylar::Config::LoadFromYaml(root);
+
+    SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << g_person->getValue().toString() << "\n"
+                                     << g_person->toString();
+}
+
 int main()
 {
     std::cout << "hello world" << std::endl;
@@ -259,7 +334,9 @@ int main()
     // test_map_to_int();
     // test_unordered_map_to_int();
 
-    test_load_ListAllMember();
+    // test_load_ListAllMember();
+
+    test_class();
 
     return 0;
 }

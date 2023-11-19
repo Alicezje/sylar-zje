@@ -44,3 +44,6 @@ target_link_libraries(test_log ${SYLAR_LOG_LIB} ${YAML_LIB_PATH})
 
 add_executable(test_config ${PROJECT_SOURCE_DIR}/tests/test_config.cc)
 target_link_libraries(test_config ${SYLAR_LOG_LIB} ${YAML_LIB_PATH})
+
+add_executable(test_config_demo ${PROJECT_SOURCE_DIR}/tests/test_config_demo.cc)
+target_link_libraries(test_config_demo ${SYLAR_LOG_LIB} ${YAML_LIB_PATH})

@@ -1,0 +1,14 @@
+system:
+    port: 8080
+    ip: 192.168.131.136
+    mac: 10:7B:44:80:F4:6A
+    user_vec: 
+     - name: zje
+       age: 31
+       passwd: qwerqwer
+     - name: zje
+       age: 31
+       passwd: edceedce
+     - name: zje
+       age: 31
+       passwd: hjkjhghj

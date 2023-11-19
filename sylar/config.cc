@@ -5,7 +5,7 @@ namespace sylar
     // 静态成员变量，需要在外部定义一下
     Config::ConfigVarMap Config::s_datas;
 
-    ConfigVarBase::ptr Config::LookupBase(std::string &name)
+    ConfigVarBase::ptr Config::LookupBase(const std::string &name)
     {
         auto it = s_datas.find(name);
         // 如果找到的返回其值，找不到返回nullptr
@@ -58,18 +58,18 @@ namespace sylar
             std::transform(key.begin(), key.end(), key.begin(), ::tolower);
             // 查询是否包含key
             ConfigVarBase::ptr var = LookupBase(key);
-
             // 如果存在key才从文件中加载更新，不存在直接跳过
             if (var)
             {
                 if (i.second.IsScalar())
                 {
-                    // Scalar类型从字符串中加载，设置m_val，进行更新
+                    // 将YAML::内结点值转为Scalar类型
+                    // 然后从字符串中加载（已通过实现偏特化实现了类型的转换），设置m_val，进行更新
                     var->fromString(i.second.Scalar());
                 }
                 else
                 {
-                    // 其他类型 Sequence,偏特化中fromString有对应的处理方法
+                    // 其他类型,偏特化中fromString有对应的处理方法
                     std::stringstream ss;
                     ss << i.second;
                     var->fromString(ss.str());

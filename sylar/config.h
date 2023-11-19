@@ -432,7 +432,7 @@ namespace sylar
             }
             catch (std::exception &e)
             {
-                SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << "ConfigVar::fromString"
+                SYLAR_LOG_ERROR(SYLAR_LOG_ROOT()) << " ConfigVar::fromString "
                                                   << e.what() << " convert: string to " << typeid(m_val).name();
             }
             return false;
@@ -525,7 +525,7 @@ namespace sylar
          */
         static void LoadFromYaml(const YAML::Node &root);
 
-        static ConfigVarBase::ptr LookupBase(std::string &name);
+        static ConfigVarBase::ptr LookupBase(const std::string &name);
 
     private:
         static ConfigVarMap s_datas;

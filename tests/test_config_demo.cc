@@ -54,6 +54,11 @@ namespace sylar
             return ss.str();
         }
 
+        bool operator==(const User &oth) const
+        {
+            return name == oth.getName() && age == oth.getAge() && passwd == oth.getPasswd();
+        }
+
     private:
         std::string name = "";
         int age = 0;

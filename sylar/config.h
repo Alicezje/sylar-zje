@@ -12,6 +12,7 @@
 #include <unordered_set>
 #include <boost/lexical_cast.hpp>
 #include <yaml-cpp/yaml.h>
+#include <functional>
 #include "log.h"
 
 namespace sylar
@@ -397,6 +398,8 @@ namespace sylar
     public:
         typedef std::shared_ptr<ConfigVar> ptr;
 
+        typedef std::function<void(const T &old_value, const T &new_value)> on_change_cb;
+
         ConfigVar(const std::string &name, const T &val, const std::string &description = "")
             : ConfigVarBase(name, description), m_val(val)
         {
@@ -443,8 +446,22 @@ namespace sylar
             return m_val;
         }
 
+        /**
+         * 设置值的时候，监听值是否发生，如果发生变化，做相应的操作
+         */
         void setValue(const T &val)
         {
+            // 这里有比较运算，需要在自定义类中重载 ==
+            if (val == m_val)
+            {
+                return;
+            }
+            for (auto &i : m_cbs)
+            {
+                // 执行回调函数
+                i.second(m_val, val);
+            }
+            // 赋值
             m_val = val;
         }
 
@@ -453,8 +470,36 @@ namespace sylar
             return typeid(T).name();
         }
 
+        // 增加监听
+        void addListener(uint64_t key, on_change_cb cb)
+        {
+            m_cbs[key] = cb;
+        }
+
+        // 删除监听
+        void delListener(uint64_t key)
+        {
+            m_cbs.erase(key);
+        }
+
+        // 获得监听器
+        on_change_cb getListener(uint64_t key)
+        {
+            auto it = m_cbs.find(key);
+            return it == m_cbs.end() ? nullptr : it->second;
+        }
+
+        // 清空监听器
+        void clearListener()
+        {
+            m_cbs.clear();
+        }
+
     private:
         T m_val; // 配置的值为value
+        // typedef std::function<void(const T &old_value, const T &new_value)> on_change_cb;
+        // 变更回调函数组<key,回调函数> uint64_t key,要求唯一，一般可以用hash值
+        std::map<uint64_t, on_change_cb> m_cbs;
     };
 
     class Config
@@ -525,6 +570,9 @@ namespace sylar
          */
         static void LoadFromYaml(const YAML::Node &root);
 
+        /**
+         * 根据name查找对应的ConfigVarBase
+         */
         static ConfigVarBase::ptr LookupBase(const std::string &name);
 
     private:

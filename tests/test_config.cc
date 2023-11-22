@@ -239,6 +239,11 @@ public:
            << "sex=" << m_sex << "]";
         return ss.str();
     }
+
+    bool operator==(const Person &oth) const
+    {
+        return m_name == oth.m_name && m_age == oth.m_age && m_sex == oth.m_sex;
+    }
 };
 
 namespace sylar
@@ -291,6 +296,12 @@ namespace sylar
 void test_class()
 {
     sylar::ConfigVar<Person>::ptr g_person = sylar::Config::Lookup("class.person", Person(), "class person");
+
+    // 使用lambda表达式定义回调函数
+    g_person->addListener(10, [](const Person &old_value, const Person &new_value)
+                          { SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "listener function"
+                                                             << "old value= " << old_value.toString()
+                                                             << "new value " << new_value.toString(); });
 
     YAML::Node root = YAML::LoadFile("/root/c_plus_plus_project/sylar/bin/conf/log.yaml");
     sylar::Config::LoadFromYaml(root);

@@ -47,7 +47,11 @@
  */
 #define SYLAR_LOG_FATAL(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::FATAL)
 
+// 获取root主日志器
 #define SYLAR_LOG_ROOT() sylar::LoggerMgr::GetInstance()->getRoot()
+
+// 更加名字获取日志
+#define SYLAR_LOG_NAME(name) sylar::LoggerMgr::GetInstance()->getLogger(name)
 
 namespace sylar
 {
@@ -267,6 +271,11 @@ namespace sylar
             return m_error;
         }
 
+        /**
+         * @brief 返回日志模板
+         */
+        const std::string getPattern() const { return m_pattern; }
+
     private:
         std::string m_pattern;                // 根据pattern的格式来解析出信息
         std::vector<FormatItem::ptr> m_items; // 需要解析的单项
@@ -335,9 +344,7 @@ namespace sylar
         /**
          * 构造函数
          */
-        Logger(const std::string &name = "root") : m_name(name)
-        {
-        }
+        Logger(const std::string &name = "root");
 
         Logger(const std::string &name, LogLevel::Level level) : m_name(name), m_level(level)
         {
@@ -426,6 +433,7 @@ namespace sylar
 
         /**
          * 将日志器的配置转成YAML String
+         * 包括m_name,m_level,m_appenders,m_formatter
          */
         std::string toYamlString();
 
@@ -436,7 +444,7 @@ namespace sylar
         LogFormatter::ptr m_formatter;             // 日志格式器
 
         // MutexType m_mutex;  // Mutex
-        Logger::ptr m_root; // 主日志器
+        Logger::ptr m_root; // 主日志器 如果该日志器的appender为空，则将日志输出到主日志器中
     };
 
     // 输出到控制台
@@ -514,6 +522,7 @@ namespace sylar
 
         /**
          * 将所有的日志器配置转成YAML String
+         * 这个
          */
         std::string toYamlString();
 

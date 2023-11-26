@@ -2,6 +2,7 @@
 #include "config.h"
 #include "log.h"
 #include "util.h"
+#include "log_config.h"
 #include <yaml-cpp/yaml.h>
 
 void print_yaml(const YAML::Node &node, int level)
@@ -310,6 +311,36 @@ void test_class()
                                      << g_person->toString();
 }
 
+void test_log()
+{
+    static sylar::Logger::ptr system_log = SYLAR_LOG_NAME("system");
+    SYLAR_LOG_INFO(system_log) << "hello system" << std::endl;
+
+    std::cout << sylar::LoggerMgr::GetInstance()->toYamlString() << std::endl;
+
+    struct sylar::LogIniter log_init;
+    // 使用yaml-cpp加载yaml文件
+    YAML::Node root = YAML::LoadFile("/root/c_plus_plus_project/sylar/bin/conf/logs.yaml");
+    // 加载yaml节点到Config中
+    sylar::Config::LoadFromYaml(root);
+
+    std::cout << "============" << std::endl;
+    // 从源代码-反序列化到字符串
+    std::cout << sylar::LoggerMgr::GetInstance()->toYamlString() << std::endl;
+    std::cout << "============" << std::endl;
+
+    // SYLAR_LOG_INFO(system_log) << "hello system" << std::endl;
+    // SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "hello system 1" << std::endl;
+    // SYLAR_LOG_INFO(SYLAR_L) << "hello system 1" << std::endl;
+
+    std::string yaml_output_file = "/root/c_plus_plus_project/sylar/bin/conf/logs_output.yaml";
+    std::ofstream m_filestream;
+    m_filestream.open(yaml_output_file);
+    // 序列化到文件
+    m_filestream << sylar::LoggerMgr::GetInstance()->toYamlString();
+    m_filestream.close();
+}
+
 int main()
 {
     std::cout << "hello world" << std::endl;
@@ -347,7 +378,9 @@ int main()
 
     // test_load_ListAllMember();
 
-    test_class();
+    // test_class();
+
+    test_log();
 
     return 0;
 }

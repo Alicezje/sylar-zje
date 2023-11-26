@@ -458,7 +458,7 @@ namespace sylar
             }
             for (auto &i : m_cbs)
             {
-                // 执行回调函数
+                // 执行回调函数，回调函数可以有多个，挨个调用
                 i.second(m_val, val);
             }
             // 赋值

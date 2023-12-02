@@ -299,7 +299,7 @@ void test_class()
     sylar::ConfigVar<Person>::ptr g_person = sylar::Config::Lookup("class.person", Person(), "class person");
 
     // 使用lambda表达式定义回调函数
-    g_person->addListener(10, [](const Person &old_value, const Person &new_value)
+    g_person->addListener([](const Person &old_value, const Person &new_value)
                           { SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "listener function"
                                                              << "old value= " << old_value.toString()
                                                              << "new value " << new_value.toString(); });

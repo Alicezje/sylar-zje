@@ -16,6 +16,8 @@ set(SYLAR_LOG_LIB
     ${PROJECT_SOURCE_DIR}/sylar/log.cc 
     ${PROJECT_SOURCE_DIR}/sylar/util.cc
     ${PROJECT_SOURCE_DIR}/sylar/config.cc
+    ${PROJECT_SOURCE_DIR}/sylar/thread.cc
+    ${PROJECT_SOURCE_DIR}/sylar/mutex.cc
 )
 add_library(sylar_log_shared SHARED ${SYLAR_LOG_LIB})
 add_library(sylar_log_static STATIC ${SYLAR_LOG_LIB})
@@ -24,6 +26,7 @@ set_target_properties (sylar_log_shared PROPERTIES OUTPUT_NAME "sylar_log")
 set_target_properties (sylar_log_static PROPERTIES OUTPUT_NAME "sylar_log")
 
 set(YAML_LIB_PATH /root/app/yaml/yaml-cpp-0.8.0/build/libyaml-cpp.so)
+set(PTHREAD_LIB pthread)
 
 # 设置静态库文件目录
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
@@ -40,10 +43,19 @@ find_library(SYLAR_LOG_LIB sylar_log HINTS ${PROJECT_SOURCE_DIR}/lib)
 
 add_executable(main main.c)
 add_executable(test_log ${PROJECT_SOURCE_DIR}/tests/test_log.cc)
-target_link_libraries(test_log ${SYLAR_LOG_LIB} ${YAML_LIB_PATH})
+target_link_libraries(test_log ${SYLAR_LOG_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
 add_executable(test_config ${PROJECT_SOURCE_DIR}/tests/test_config.cc)
-target_link_libraries(test_config ${SYLAR_LOG_LIB} ${YAML_LIB_PATH})
+target_link_libraries(test_config ${SYLAR_LOG_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
 add_executable(test_config_demo ${PROJECT_SOURCE_DIR}/tests/test_config_demo.cc)
-target_link_libraries(test_config_demo ${SYLAR_LOG_LIB} ${YAML_LIB_PATH})
+target_link_libraries(test_config_demo ${SYLAR_LOG_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+
+add_executable(test_thread ${PROJECT_SOURCE_DIR}/tests/test_thread.cc)
+target_link_libraries(test_thread ${SYLAR_LOG_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+
+add_executable(test_thread_consumer ${PROJECT_SOURCE_DIR}/tests/test_thread_consumer.cc)
+target_link_libraries(test_thread_consumer ${SYLAR_LOG_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+
+add_executable(test_semaphore ${PROJECT_SOURCE_DIR}/tests/test_semaphore.cc)
+target_link_libraries(test_semaphore ${SYLAR_LOG_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})

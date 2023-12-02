@@ -396,8 +396,9 @@ namespace sylar
     class ConfigVar : public ConfigVarBase
     {
     public:
+        // 读写锁
+        typedef RWMutex RWMutexType;
         typedef std::shared_ptr<ConfigVar> ptr;
-
         typedef std::function<void(const T &old_value, const T &new_value)> on_change_cb;
 
         ConfigVar(const std::string &name, const T &val, const std::string &description = "")
@@ -412,6 +413,7 @@ namespace sylar
         {
             try
             {
+                RWMutexType::ReadLock lock(m_mutex);
                 return ToStr()(m_val);
                 // return boost::lexical_cast<std::string>(m_val);
             }
@@ -441,8 +443,9 @@ namespace sylar
             return false;
         }
 
-        const T getValue() const
+        const T getValue()
         {
+            RWMutexType::ReadLock lock(m_mutex);
             return m_val;
         }
 
@@ -451,16 +454,20 @@ namespace sylar
          */
         void setValue(const T &val)
         {
-            // 这里有比较运算，需要在自定义类中重载 ==
-            if (val == m_val)
             {
-                return;
+                RWMutexType::ReadLock lock(m_mutex);
+                // 这里有比较运算，需要在自定义类中重载 ==
+                if (val == m_val)
+                {
+                    return;
+                }
+                for (auto &i : m_cbs)
+                {
+                    // 执行回调函数，回调函数可以有多个，挨个调用
+                    i.second(m_val, val);
+                }
             }
-            for (auto &i : m_cbs)
-            {
-                // 执行回调函数，回调函数可以有多个，挨个调用
-                i.second(m_val, val);
-            }
+            RWMutexType::WriteLock lock(m_mutex);
             // 赋值
             m_val = val;
         }
@@ -470,21 +477,30 @@ namespace sylar
             return typeid(T).name();
         }
 
-        // 增加监听
-        void addListener(uint64_t key, on_change_cb cb)
+        /**
+         * 添加变化回调函数
+         * 返回该回调函数对应的唯一id,用于删除回调
+         */
+        uint64_t addListener(on_change_cb cb)
         {
-            m_cbs[key] = cb;
+            static uint64_t s_fun_id = 0;
+            RWMutexType::WriteLock lock(m_mutex);
+            ++s_fun_id;
+            m_cbs[s_fun_id] = cb;
+            return s_fun_id;
         }
 
         // 删除监听
         void delListener(uint64_t key)
         {
+            RWMutexType::WriteLock lock(m_mutex);
             m_cbs.erase(key);
         }
 
         // 获得监听器
         on_change_cb getListener(uint64_t key)
         {
+            RWMutexType::ReadLock lock(m_mutex);
             auto it = m_cbs.find(key);
             return it == m_cbs.end() ? nullptr : it->second;
         }
@@ -492,10 +508,12 @@ namespace sylar
         // 清空监听器
         void clearListener()
         {
+            RWMutexType::WriteLock lock(m_mutex);
             m_cbs.clear();
         }
 
     private:
+        RWMutexType m_mutex;
         T m_val; // 配置的值为value
         // typedef std::function<void(const T &old_value, const T &new_value)> on_change_cb;
         // 变更回调函数组<key,回调函数> uint64_t key,要求唯一，一般可以用hash值
@@ -507,6 +525,8 @@ namespace sylar
     public:
         // 字符串 --> 配置变量
         typedef std::map<std::string, ConfigVarBase::ptr> ConfigVarMap;
+        // 读写锁
+        typedef RWMutex RWMutexType;
 
         // 静态成员函数
         /**
@@ -517,8 +537,9 @@ namespace sylar
                                                  const T &default_value,
                                                  const std::string &description = "")
         {
-            auto it = s_datas.find(name); // 寻找是否存在key值
-            if (it != s_datas.end())
+            RWMutexType::WriteLock lock(GetMutex());
+            auto it = GetDatas().find(name); // 寻找是否存在key值
+            if (it != GetDatas().end())
             {
                 // 查看类型是否相同
                 auto temp = std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
@@ -547,7 +568,7 @@ namespace sylar
             }
 
             typename ConfigVar<T>::ptr v(new ConfigVar<T>(name, default_value, description));
-            s_datas[name] = v; // 放进入
+            GetDatas()[name] = v; // 放进入
             return v;
         }
 
@@ -557,8 +578,9 @@ namespace sylar
         template <class T>
         static typename ConfigVar<T>::ptr Lookup(const std::string &name)
         {
-            auto it = s_datas.find(name);
-            if (it == s_datas.end())
+            RWMutexType::ReadLock lock(GetMutex());
+            auto it = GetDatas().find(name);
+            if (it == GetDatas().end())
             {
                 return nullptr;
             }
@@ -575,8 +597,37 @@ namespace sylar
          */
         static ConfigVarBase::ptr LookupBase(const std::string &name);
 
+        /**
+         * @brief 遍历配置模块里面所有配置项
+         * @param[in] cb 配置项回调函数
+         */
+        static void Visit(std::function<void(ConfigVarBase::ptr)> cb);
+
     private:
-        static ConfigVarMap s_datas;
+        /**
+         * 配置项的所有配置项
+         */
+        static ConfigVarMap &GetDatas()
+        {
+            static ConfigVarMap s_datas;
+            return s_datas;
+        }
+        /**
+         * 放在静态方法里，静态锁
+         * 为什么使用静态方法的形式返回读写锁？
+         * 因为Config类创建一个全局变量，全局变量的初始化没有严格的顺序
+         * 如果不使用静态方法，而使用静态成员的方式，如果静态成员的初始化顺序，比执行那个方法要晚
+         * 就会出现，锁还没有构建成功，会出现内存错误
+         */
+
+        /**
+         * 配置项的所有RWMutex
+         */
+        static RWMutexType &GetMutex()
+        {
+            static RWMutexType s_mutex;
+            return s_mutex;
+        }
     };
 
 }

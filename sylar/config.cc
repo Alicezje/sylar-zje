@@ -2,14 +2,12 @@
 
 namespace sylar
 {
-    // 静态成员变量，需要在外部定义一下
-    Config::ConfigVarMap Config::s_datas;
-
     ConfigVarBase::ptr Config::LookupBase(const std::string &name)
     {
-        auto it = s_datas.find(name);
+        RWMutexType::ReadLock lock(GetMutex());
+        auto it = GetDatas().find(name);
         // 如果找到的返回其值，找不到返回nullptr
-        return it == s_datas.end() ? nullptr : it->second;
+        return it == GetDatas().end() ? nullptr : it->second;
     }
 
     static void ListAllMember(const std::string &prefix,
@@ -75,6 +73,16 @@ namespace sylar
                     var->fromString(ss.str());
                 }
             }
+        }
+    }
+
+    void Config::Visit(std::function<void(ConfigVarBase::ptr)> cb)
+    {
+        RWMutexType::ReadLock lock(GetMutex());
+        ConfigVarMap &m = GetDatas();
+        for (auto it = m.begin(); it != m.end(); ++it)
+        {
+            cb(it->second);
         }
     }
 

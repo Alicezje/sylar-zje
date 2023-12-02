@@ -11,6 +11,7 @@
 #include <fstream>
 #include "singleton.h"
 #include "util.h"
+#include "thread.h"
 
 /**
  * 使用流式方式将日志级别level的日志写入到logger
@@ -291,7 +292,8 @@ namespace sylar
 
     public:
         typedef std::shared_ptr<LogAppender> ptr;
-        // typedef Spinlock MutexType;
+        // 定义锁地类型，此处为自旋锁
+        typedef Spinlock MutexType;
 
         /**
          * 虚析构函数
@@ -326,9 +328,8 @@ namespace sylar
         LogLevel::Level m_level = LogLevel::DEBUG;
         // 是否有自己的日志格式器
         bool m_hasFormatter = false;
-        /// Mutex
-        // MutexType m_mutex;
-
+        // 写比较多，读比较少
+        MutexType m_mutex;
         LogFormatter::ptr m_formatter;
     };
 
@@ -340,6 +341,7 @@ namespace sylar
 
     public:
         typedef std::shared_ptr<Logger> ptr;
+        typedef Spinlock MutexType;
 
         /**
          * 构造函数
@@ -442,9 +444,8 @@ namespace sylar
         LogLevel::Level m_level;                   // 日志级别
         std::vector<LogAppender::ptr> m_appenders; // Appender集合
         LogFormatter::ptr m_formatter;             // 日志格式器
-
-        // MutexType m_mutex;  // Mutex
-        Logger::ptr m_root; // 主日志器 如果该日志器的appender为空，则将日志输出到主日志器中
+        MutexType m_mutex;                         // Mutex
+        Logger::ptr m_root;                        // 主日志器 如果该日志器的appender为空，则将日志输出到主日志器中
     };
 
     // 输出到控制台
@@ -495,7 +496,7 @@ namespace sylar
     class LoggerManager
     {
     public:
-        // typedef Spinlock MutexType;
+        typedef Spinlock MutexType;
 
         /**
          * 构造函数
@@ -527,7 +528,7 @@ namespace sylar
         std::string toYamlString();
 
     private:
-        // MutexType m_mutex;                            // Mutex
+        MutexType m_mutex;                            // Mutex
         std::map<std::string, Logger::ptr> m_loggers; // 日志器容器,根据名称获取日志类
         Logger::ptr m_root;                           // 主日志器
     };

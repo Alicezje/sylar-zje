@@ -3,17 +3,6 @@
 #include <iostream>
 #include <unistd.h>
 
-void fun1()
-{
-    SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "name: " << sylar::Thread::GetName()
-                                     << " this.name " << sylar::Thread::GetThis()->getName()
-                                     << " id: " << sylar::GetThreadId()
-                                     << " this.id " << sylar::Thread::GetThis()->getId();
-}
-
-void fun2()
-{
-}
 
 void *myThreadID1(void *)
 {
@@ -199,28 +188,38 @@ void p_thread_rwlock_test()
     pthread_rwlock_destroy(&rwlock);
 }
 
+void fun1()
+{
+    SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "name: " << sylar::Thread::GetName()
+                                     << " this.name " << sylar::Thread::GetThis()->getName()
+                                     << " id: " << sylar::GetThreadId()
+                                     << " this.id " << sylar::Thread::GetThis()->getId();
+}
+
+void fun2()
+{
+}
+
 int main()
 {
-    // sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
-    // SYLAR_LOG_INFO(g_logger) << "thread test begin";
-    // std::vector<sylar::Thread::ptr> thrs;
-    // for (int i = 0; i < 5; i++)
-    // {
-    //     sylar::Thread::ptr thr(new sylar::Thread(&fun1, "name_" + std::to_string(i)));
-    //     thrs.push_back(thr);
-    // }
-    // sleep(20);
-    // for (int i = 0; i < 5; i++)
-    // {
-    //     std::cout<<thrs[i]->GetName()<<std::endl;
-    //     thrs[i]->join();
-    // }
-    // SYLAR_LOG_INFO(g_logger) << "thread test end";
+    sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
+    SYLAR_LOG_INFO(g_logger) << "thread test begin";
+    std::vector<sylar::Thread::ptr> thrs;
+    for (int i = 0; i < 5; i++)
+    {
+        sylar::Thread::ptr thr(new sylar::Thread(&fun1, "name_" + std::to_string(i)));
+        thrs.push_back(thr);
+    }
+    sleep(2);
+    for (int i = 0; i < 5; i++)
+    {
+        std::cout << thrs[i]->GetName() << std::endl;
+        thrs[i]->join();
+    }
+    SYLAR_LOG_INFO(g_logger) << "thread test end";
 
     // p_thread_test();
-
     // p_thread_sync_test_1();
-
     // p_thread_rwlock_test();
 
     return 0;

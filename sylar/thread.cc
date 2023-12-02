@@ -4,23 +4,29 @@
 
 namespace sylar
 {
+    // 线程指针
     static thread_local Thread *t_thread = nullptr;
+    // 线程名称
     static thread_local std::string t_thread_name = "UNKNOW";
 
     static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     Thread *Thread::GetThis()
     {
-        return nullptr;
+        return t_thread;
     }
 
     const std::string Thread::GetName()
     {
-        return "";
+        return t_thread_name;
     }
 
     void Thread::SetName(const std::string &name)
     {
+        if (name.empty())
+        {
+            return;
+        }
         if (t_thread)
         {
             t_thread->m_name = name;
@@ -30,27 +36,32 @@ namespace sylar
 
     /**
      * 初始化一个线程
-     * 线程运行的函数
-     * 线程名称
+     * - 线程运行的函数
+     * - 线程名称
      */
     Thread::Thread(std::function<void()> cb, const std::string &name)
+        : m_cb(cb), m_name(name)
     {
         if (name.empty())
         {
             m_name = "UNKNOW";
         }
+        // 创建线程, void* run(void* arg)
         int rt = pthread_create(&m_thread, nullptr, &Thread::run, this);
         if (rt)
         {
             SYLAR_LOG_ERROR(g_logger) << "pthread_create thread fail=" << rt << " name= " << name;
             throw std::logic_error("pthread_create error");
         }
+        // 申请信号量，如果申请不到，已知等待
+        m_semaphore.wait();
     }
 
     Thread::~Thread()
     {
         if (m_thread)
         {
+            // 线程分离
             pthread_detach(m_thread);
         }
     }
@@ -59,14 +70,13 @@ namespace sylar
     {
         if (m_thread)
         {
-            // 阻塞主线程，去执行该子线程
+            // 回收进行资源，阻塞进程
             int rt = pthread_join(m_thread, nullptr);
             if (rt)
             {
                 SYLAR_LOG_ERROR(g_logger) << "pthread_join thread fail=" << rt;
                 throw std::logic_error("pthread_join error");
             }
-            //?
             m_thread = 0;
         }
     }
@@ -79,8 +89,11 @@ namespace sylar
         pthread_setname_np(pthread_self(), thread->m_name.substr(0, 15).c_str());
 
         std::function<void()> cb;
+        // 交换地址
         cb.swap(thread->m_cb);
-
+        // 释放信号量
+        thread->m_semaphore.notify();
+        // 执行函数
         cb();
         return 0;
     }

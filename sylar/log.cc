@@ -115,9 +115,11 @@ namespace sylar
 
     void Logger::addAppender(LogAppender::ptr appender)
     {
+        MutexType::Lock lock(m_mutex);
         // 添加一个appender
         if (!appender->getFormatter())
         {
+            MutexType::Lock ll(appender->m_mutex);
             // 如果该appender没有自己的formatter,则需要设置为父日志的formatter
             // appender->setFormatter(m_formatter);
             appender->m_formatter = m_formatter;
@@ -127,6 +129,7 @@ namespace sylar
 
     void Logger::delAppender(LogAppender::ptr appender)
     {
+        MutexType::Lock lock(m_mutex);
         for (auto it = m_appenders.begin(); it != m_appenders.end(); it++)
         {
             if (*it == appender)
@@ -139,19 +142,19 @@ namespace sylar
 
     void Logger::clearAppenders()
     {
-        // MutexType::Lock lock(m_mutex);
+        MutexType::Lock lock(m_mutex);
         m_appenders.clear();
     }
 
     void Logger::setFormatter(LogFormatter::ptr val)
     {
-        // MutexType::Lock lock(m_mutex);
+        MutexType::Lock lock(m_mutex);
         // 设置自己的formatter
         m_formatter = val;
         // 设置下游的formatter,如果本身有自己的formatter就不需要再设置了
         for (auto &i : m_appenders)
         {
-            // MutexType::Lock ll(i->m_mutex);
+            MutexType::Lock ll(i->m_mutex);
             if (!i->m_hasFormatter)
             {
                 // 该appender中没有自己的formatter,则设置成父日志的formatter
@@ -177,7 +180,7 @@ namespace sylar
 
     LogFormatter::ptr Logger::getFormatter()
     {
-        // MutexType::Lock lock(m_mutex);
+        MutexType::Lock lock(m_mutex);
         return m_formatter;
     }
 
@@ -191,7 +194,7 @@ namespace sylar
         if (level >= m_level)
         {
             auto self = shared_from_this();
-            // MutexType::Lock lock(m_mutex);
+            MutexType::Lock lock(m_mutex);
             if (!m_appenders.empty())
             {
                 for (auto &i : m_appenders)
@@ -233,7 +236,7 @@ namespace sylar
 
     void LogAppender::setFormatter(LogFormatter::ptr val)
     {
-        // MutexType::Lock lock(m_mutex);
+        MutexType::Lock lock(m_mutex);
         m_formatter = val;
         if (m_formatter)
         {
@@ -248,7 +251,7 @@ namespace sylar
     LogFormatter::ptr LogAppender::getFormatter()
     {
         // 保证原子性
-        //  MutexType::Lock lock(m_mutex);
+        MutexType::Lock lock(m_mutex);
         return m_formatter;
     }
 
@@ -258,7 +261,7 @@ namespace sylar
 
     std::string Logger::toYamlString()
     {
-        // MutexType::Lock lock(m_mutex);
+        MutexType::Lock lock(m_mutex);
         YAML::Node node;
         // name
         node["name"] = m_name;
@@ -290,7 +293,7 @@ namespace sylar
     {
         if (level >= m_level)
         {
-            // MutexType::Lock lock(m_mutex);
+            MutexType::Lock lock(m_mutex);
             // 按照指定格式进行格式化
             std::cout << m_formatter->format(logger, level, event);
         }
@@ -298,7 +301,7 @@ namespace sylar
 
     std::string StdoutLogAppender::toYamlString()
     {
-        // MutexType::Lock lock(m_mutex);
+        MutexType::Lock lock(m_mutex);
         YAML::Node node;
         node["type"] = "StdoutLogAppender";
         if (m_level != LogLevel::UNKNOW)
@@ -325,7 +328,7 @@ namespace sylar
 
     bool FileLogAppender::reopen()
     {
-        // MutexType::Lock lock(m_mutex);
+        MutexType::Lock lock(m_mutex);
         if (m_filestream)
         {
             m_filestream.close();
@@ -338,13 +341,26 @@ namespace sylar
     {
         if (level >= m_level)
         {
-            m_filestream << m_formatter->format(logger, level, event);
+            // m_filestream << m_formatter->format(logger, level, event);
+
+            uint64_t now = event->getTime();
+            if (now >= (m_lastTime + 3))
+            {
+                reopen();
+                m_lastTime = now;
+            }
+            MutexType::Lock lock(m_mutex);
+            // if(!(m_filestream << m_formatter->format(logger, level, event))) {
+            if (!m_formatter->format(m_filestream, logger, level, event))
+            {
+                std::cout << "error" << std::endl;
+            }
         }
     }
 
     std::string FileLogAppender::toYamlString()
     {
-        // MutexType::Lock lock(m_mutex);
+        MutexType::Lock lock(m_mutex);
         YAML::Node node;
         node["type"] = "FileLogAppender";
         node["file"] = m_filename;
@@ -785,7 +801,7 @@ namespace sylar
 
     Logger::ptr LoggerManager::getLogger(const std::string &name)
     {
-        // MutexType::Lock lock(m_mutex);
+        MutexType::Lock lock(m_mutex);
         auto it = m_loggers.find(name);
         if (it != m_loggers.end())
         {

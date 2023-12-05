@@ -14,10 +14,11 @@ include_directories(/root/app/yaml/yaml-cpp-0.8.0/include)
 # 设置库文件路径
 set(SYLAR_LOG_LIB 
     ${PROJECT_SOURCE_DIR}/sylar/log.cc 
-    ${PROJECT_SOURCE_DIR}/sylar/util.cc
     ${PROJECT_SOURCE_DIR}/sylar/config.cc
     ${PROJECT_SOURCE_DIR}/sylar/thread.cc
     ${PROJECT_SOURCE_DIR}/sylar/mutex.cc
+    ${PROJECT_SOURCE_DIR}/sylar/util.cc
+    ${PROJECT_SOURCE_DIR}/sylar/fiber.cc
 )
 add_library(sylar_log_shared SHARED ${SYLAR_LOG_LIB})
 add_library(sylar_log_static STATIC ${SYLAR_LOG_LIB})
@@ -59,3 +60,9 @@ target_link_libraries(test_thread_consumer ${SYLAR_LOG_LIB} ${YAML_LIB_PATH} ${P
 
 add_executable(test_semaphore ${PROJECT_SOURCE_DIR}/tests/test_semaphore.cc)
 target_link_libraries(test_semaphore ${SYLAR_LOG_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+
+add_executable(test_util ${PROJECT_SOURCE_DIR}/tests/test_util.cc)
+target_link_libraries(test_util ${SYLAR_LOG_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+
+add_executable(test_fiber ${PROJECT_SOURCE_DIR}/tests/test_fiber.cc)
+target_link_libraries(test_fiber ${SYLAR_LOG_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})

@@ -4,6 +4,7 @@
 
 namespace sylar
 {
+    // thread_local 线程开始时被生成，线程结束时销毁
     // 线程指针
     static thread_local Thread *t_thread = nullptr;
     // 线程名称
@@ -53,7 +54,7 @@ namespace sylar
             SYLAR_LOG_ERROR(g_logger) << "pthread_create thread fail=" << rt << " name= " << name;
             throw std::logic_error("pthread_create error");
         }
-        // 申请信号量，如果申请不到，已知等待
+        // 申请信号量，如果申请不到，一直等待
         m_semaphore.wait();
     }
 
@@ -83,8 +84,9 @@ namespace sylar
 
     void *Thread::run(void *arg)
     {
-        Thread *thread = (Thread *)arg;
-        t_thread = thread;
+        // 参数传入的arg是thread类的this
+        Thread *thread = (Thread *)arg; // 转成Thread
+        t_thread = thread;              // 给thread_local变量赋值
         thread->m_id = sylar::GetThreadId();
         pthread_setname_np(pthread_self(), thread->m_name.substr(0, 15).c_str());
 

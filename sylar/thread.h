@@ -74,7 +74,7 @@ namespace sylar
 
     private:
         /**
-         * 运行线程
+         * 运行线程，线程内部所执行的方法
          */
         static void *run(void *arg);
 

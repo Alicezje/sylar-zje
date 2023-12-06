@@ -9,6 +9,10 @@
 #include <map>
 #include <sstream>
 #include <fstream>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/un.h>
 #include "singleton.h"
 #include "util.h"
 #include "thread.h"
@@ -490,6 +494,7 @@ namespace sylar
         uint64_t m_lastTime = 0;    // 上次重新打开时间
     };
 
+    
     /**
      * 日志管理类
      */

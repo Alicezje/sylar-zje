@@ -246,7 +246,7 @@ namespace sylar
     private:
         MutexType m_mutex;                  // 锁
         std::vector<Thread::ptr> m_threads; // 线程池
-        std::list<FiberAndThread> m_fibers; // 待执行的协程队列
+        std::list<FiberAndThread> m_fibers; // 待执行的协程队列(任务队列？)
         Fiber::ptr m_rootFiber;             // 主协程 use_caller为true时有效，调度协程
         std::string m_name;                 // 协程调度器名称
 

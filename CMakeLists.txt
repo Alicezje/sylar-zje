@@ -43,38 +43,38 @@ find_library(SYLAR_LIB sylar_lib HINTS ${PROJECT_SOURCE_DIR}/lib)
 
 # add_executable(main main.c)
 
-add_executable(test_log ${PROJECT_SOURCE_DIR}/tests/test_log.cc)
-target_link_libraries(test_log ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+# add_executable(test_log ${PROJECT_SOURCE_DIR}/tests/test_log.cc)
+# target_link_libraries(test_log ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
-add_executable(test_config ${PROJECT_SOURCE_DIR}/tests/test_config.cc)
-target_link_libraries(test_config ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+# add_executable(test_config ${PROJECT_SOURCE_DIR}/tests/test_config.cc)
+# target_link_libraries(test_config ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
-add_executable(test_config_demo ${PROJECT_SOURCE_DIR}/tests/test_config_demo.cc)
-target_link_libraries(test_config_demo ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+# add_executable(test_config_demo ${PROJECT_SOURCE_DIR}/tests/test_config_demo.cc)
+# target_link_libraries(test_config_demo ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
-add_executable(test_thread ${PROJECT_SOURCE_DIR}/tests/test_thread.cc)
-target_link_libraries(test_thread ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+# add_executable(test_thread ${PROJECT_SOURCE_DIR}/tests/test_thread.cc)
+# target_link_libraries(test_thread ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
-add_executable(test_thread_consumer ${PROJECT_SOURCE_DIR}/tests/test_thread_consumer.cc)
-target_link_libraries(test_thread_consumer ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+# add_executable(test_thread_consumer ${PROJECT_SOURCE_DIR}/tests/test_thread_consumer.cc)
+# target_link_libraries(test_thread_consumer ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
-add_executable(test_semaphore ${PROJECT_SOURCE_DIR}/tests/test_semaphore.cc)
-target_link_libraries(test_semaphore ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+# add_executable(test_semaphore ${PROJECT_SOURCE_DIR}/tests/test_semaphore.cc)
+# target_link_libraries(test_semaphore ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
-add_executable(test_util ${PROJECT_SOURCE_DIR}/tests/test_util.cc)
-target_link_libraries(test_util ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+# add_executable(test_util ${PROJECT_SOURCE_DIR}/tests/test_util.cc)
+# target_link_libraries(test_util ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
 add_executable(test_fiber ${PROJECT_SOURCE_DIR}/tests/test_fiber.cc)
 target_link_libraries(test_fiber ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
-add_executable(test_log_socket ${PROJECT_SOURCE_DIR}/tests/test_log_socket.cc)
-target_link_libraries(test_log_socket ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+# add_executable(test_log_socket ${PROJECT_SOURCE_DIR}/tests/test_log_socket.cc)
+# target_link_libraries(test_log_socket ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
-add_executable(start_log_socket_server ${PROJECT_SOURCE_DIR}/tests/start_log_socket_server.cc)
-target_link_libraries(start_log_socket_server ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+# add_executable(start_log_socket_server ${PROJECT_SOURCE_DIR}/tests/start_log_socket_server.cc)
+# target_link_libraries(start_log_socket_server ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
-add_executable(test_log_send ${PROJECT_SOURCE_DIR}/tests/test_log_send.cc)
-target_link_libraries(test_log_send ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+# add_executable(test_log_send ${PROJECT_SOURCE_DIR}/tests/test_log_send.cc)
+# target_link_libraries(test_log_send ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
 add_executable(test_scheduler ${PROJECT_SOURCE_DIR}/tests/test_scheduler.cc)
 target_link_libraries(test_scheduler ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})

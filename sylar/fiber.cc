@@ -2,6 +2,7 @@
 #include "config.h"
 #include "macro.h"
 #include "log.h"
+#include "scheduler.h"
 #include <atomic>
 
 namespace sylar
@@ -80,6 +81,7 @@ namespace sylar
         m_ctx.uc_stack.ss_sp = m_stack;       // 栈指针
         m_ctx.uc_stack.ss_size = m_stacksize; // 栈大小
 
+        // 设置协程要执行的函数
         if (!use_caller)
         {
             // 不使用use_caller则执行MainFunc
@@ -165,20 +167,26 @@ namespace sylar
         return t_fiber->shared_from_this();
     }
 
+    // 切换到当前协程执行
     void Fiber::swapIn()
     {
-        // 正在运行的协程放到后台，执行当前协程
         SetThis(this);
-
         SYLAR_ASSERT(m_state != EXEC);
-        m_state = EXEC; // 设为运行态
-        // 更改上下文: 恢复m_cxt执行的上下文，将当前上下文存入主协程中
-        if (swapcontext(&t_threadFiber->m_ctx, &m_ctx))
+        m_state = EXEC;
+        if (swapcontext(&Scheduler::GetMainFiber()->m_ctx, &m_ctx))
         {
             SYLAR_ASSERT2(false, "swapcontext");
         }
-        // 主协程状态设为什么？主协程一直为EXEC状态
-        SYLAR_LOG_DEBUG(g_logger) << "Fiber::swapIn() to id=" << m_id;
+    }
+
+    // 切换到后台执行
+    void Fiber::swapOut()
+    {
+        SetThis(Scheduler::GetMainFiber());
+        if (swapcontext(&m_ctx, &Scheduler::GetMainFiber()->m_ctx))
+        {
+            SYLAR_ASSERT2(false, "swapcontext");
+        }
     }
 
     void Fiber::call()
@@ -199,19 +207,6 @@ namespace sylar
         {
             SYLAR_ASSERT2(false, "swapcontext");
         }
-    }
-
-    void Fiber::swapOut()
-    {
-        // 获取主协程，设置到主协程
-        SetThis(t_threadFiber.get());
-        // 交换上下文
-        if (swapcontext(&m_ctx, &t_threadFiber->m_ctx))
-        {
-            SYLAR_ASSERT2(false, "swapcontext");
-        }
-        // 状态设为什么？HOLD 还是 READY
-        SYLAR_LOG_DEBUG(g_logger) << "Fiber::swapOut() from id=" << m_id;
     }
 
     void Fiber::YieldToReady()
@@ -284,7 +279,7 @@ namespace sylar
         {
             cur->m_cb();
             cur->m_cb = nullptr;
-            cur->m_state = TERM;
+            cur->m_state = TERM; // 状态置为执行结束
         }
         catch (std::exception &ex)
         {

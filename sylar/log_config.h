@@ -1,5 +1,5 @@
-#ifndef __LOG_CONFIG_H__
-#define __LOG_CONFIG_H__
+#ifndef __SYLAR_LOG_CONFIG_H__
+#define __SYLAR_LOG_CONFIG_H__
 
 #include "log.h"
 #include "config.h"

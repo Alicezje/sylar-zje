@@ -1,4 +1,10 @@
 #include <execinfo.h>
+#include <sys/time.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "util.h"
 #include "log.h"
 #include "fiber.h"
@@ -10,7 +16,7 @@ namespace sylar
     // 先写固定的数
     pid_t GetThreadId()
     {
-        return 2048;
+        return syscall(SYS_gettid);
     }
 
     uint32_t GetFiberId()

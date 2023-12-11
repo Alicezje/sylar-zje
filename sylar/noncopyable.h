@@ -1,10 +1,11 @@
+#ifndef __SYLAR_NONCOPYABLE_H__
+#define __SYLAR_NONCOPYABLE_H__
+
 /**
  * 对象不可拷贝封装
  * 禁用拷贝构造函数
  * 禁用赋值函数
  */
-#ifndef __SYLAR_NONCOPYABLE_H__
-#define __SYLAR_NONCOPYABLE_H__
 
 namespace sylar
 {

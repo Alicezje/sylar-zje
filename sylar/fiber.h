@@ -8,7 +8,10 @@
 
 namespace sylar
 {
-
+    /**
+     * @brief 协程类
+     *
+     */
     class Fiber : public std::enable_shared_from_this<Fiber>
     {
     public:
@@ -36,8 +39,9 @@ namespace sylar
          *
          * @param cb 协程执行的函数
          * @param stacksize 协程栈大小
+         * @param use_caller 是否在MainFiber上调度
          */
-        Fiber(std::function<void()> cb, size_t stacksize = 0);
+        Fiber(std::function<void()> cb, size_t stacksize = 0, bool use_caller = false);
 
         /**
          * @brief Destroy the Fiber object
@@ -61,6 +65,25 @@ namespace sylar
          */
         void swapOut();
 
+        /**
+         * @brief 将当前协程切换到执行状态
+         * @pre 执行的为当前线程的主协程
+         */
+        void call();
+
+        /**
+         * @brief 将当前线程切换到后台
+         * @pre 执行的为该协程
+         * @post 返回到线程的主协程
+         *
+         */
+        void back();
+
+        /**
+         * @brief 返回协程id
+         *
+         * @return u_int64_t
+         */
         u_int64_t getId() const
         {
             return m_id;
@@ -71,6 +94,11 @@ namespace sylar
          * @return State
          */
         State getState() const { return m_state; }
+
+        void setState(const State state)
+        {
+            m_state = state;
+        }
 
     public:
         /**
@@ -103,8 +131,15 @@ namespace sylar
 
         /**
          * 协程所要执行的主函数
+         * 执行完后返回到线程的主协程
          */
         static void MainFunc();
+
+        /**
+         * @brief 协程执行函数
+         * 执行完成返回到线程调度协程
+         */
+        static void CallerMainFunc();
 
         /**
          * 获取协程ID
@@ -116,7 +151,7 @@ namespace sylar
         uint32_t m_stacksize = 0; // 栈大小
         State m_state = INIT;     // 协程状态
 
-        ucontext_t m_cxt; // 保存上下文
+        ucontext_t m_ctx; // 保存上下文
 
         void *m_stack = nullptr;    // 协程栈
         std::function<void()> m_cb; // 协程执行的函数

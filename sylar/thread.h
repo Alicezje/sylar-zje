@@ -83,7 +83,7 @@ namespace sylar
         pthread_t m_thread = 0;     // 线程结构(通过pthread_create创建得到的)
         std::function<void()> m_cb; // 线程所执行的函数
         std::string m_name;         // 线程名称
-        Semaphore m_semaphore;      // 信号量，用于互斥
+        Semaphore m_semaphore;      // 信号量，用于互斥，信号量初始值为0
     };
 }
 

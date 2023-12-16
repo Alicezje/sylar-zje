@@ -17,6 +17,7 @@ namespace sylar
      * 当前线程正在运行的协程
      */
     static thread_local Fiber *t_fiber = nullptr;
+
     /**
      * 主协程
      */
@@ -170,9 +171,10 @@ namespace sylar
     // 切换到当前协程执行
     void Fiber::swapIn()
     {
-        SetThis(this);
+        SetThis(this); // 置为当前协程
         SYLAR_ASSERT(m_state != EXEC);
         m_state = EXEC;
+        // 与主协程进行切换
         if (swapcontext(&Scheduler::GetMainFiber()->m_ctx, &m_ctx))
         {
             SYLAR_ASSERT2(false, "swapcontext");
@@ -191,7 +193,7 @@ namespace sylar
 
     void Fiber::call()
     {
-        // 将当前线程换为目标线程
+        // 将当前协程上下文保存到t_threadFiber主协程中，切换到目标协程
         SetThis(this);
         m_state = EXEC;
         if (swapcontext(&t_threadFiber->m_ctx, &m_ctx))
@@ -202,6 +204,7 @@ namespace sylar
 
     void Fiber::back()
     {
+        // 将当前协程上下文m_ctx中，切换到主协程
         SetThis(t_threadFiber.get());
         if (swapcontext(&m_ctx, &t_threadFiber->m_ctx))
         {

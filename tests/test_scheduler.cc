@@ -17,24 +17,28 @@ void test_fiber()
     }
 }
 
+void test_fiber_1()
+{
+    SYLAR_LOG_INFO(g_logger) << "test in fiber";
+}
+
 int main(int argc, char **argv)
 {
     SYLAR_LOG_INFO(g_logger) << "main";
-    // sylar::Scheduler sc(3, false, "zje");
-    sylar::Scheduler sc(3, true, "zje");
+    sylar::Scheduler sc(1, false, "zje");
+    // sylar::Scheduler sc(3, true, "zje");
 
     sc.start();
+
     sleep(2);
     SYLAR_LOG_INFO(g_logger) << "schedule";
-    sc.schedule(&test_fiber);
+
+    // 加入任务，可以执行该任务放到执行线程上执行
+    // sc.schedule(&test_fiber);
+    sc.schedule(&test_fiber_1);
 
     sc.stop();
     SYLAR_LOG_INFO(g_logger) << "over";
 
-    /**
-     * 可能存在bug
-     * 新建Scheduler对象时，内部调用GetThis方法创建一个主协程，为什么下面还要创建一次？？
-     *
-     */
     return 0;
 }

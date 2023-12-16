@@ -96,7 +96,7 @@ namespace sylar
          * @brief 批量调度协程
          *
          * @tparam InputIterator
-         * @param begin 协程输入开始位置
+         * @param begin 协程数组开始位置
          * @param end   协程数组结束位置
          */
         template <class InputIterator>
@@ -210,6 +210,12 @@ namespace sylar
             {
             }
 
+            /**
+             * @brief 传入智能指针的指针
+             *
+             * @param f
+             * @param thr
+             */
             FiberAndThread(Fiber::ptr *f, int thr)
                 : thread(thr)
             {
@@ -246,18 +252,20 @@ namespace sylar
     private:
         MutexType m_mutex;                  // 锁
         std::vector<Thread::ptr> m_threads; // 线程池
-        std::list<FiberAndThread> m_fibers; // 待执行的协程队列(任务队列？)
-        Fiber::ptr m_rootFiber;             // 主协程 use_caller为true时有效，调度协程
+        std::list<FiberAndThread> m_fibers; // 待执行的任务队列(里面是一个个的协程)
         std::string m_name;                 // 协程调度器名称
+        // 为caller线程设计的变量
+        Fiber::ptr m_rootFiber; // use_caller=true时，该值为caller线程的调度协程
 
     protected:
         std::vector<int> m_threadIds;                  // 线程id号数组
         size_t m_threadCount = 0;                      // 线程数量
-        std::atomic<size_t> m_activeThreadCount = {0}; // 活跃线程数量
+        std::atomic<size_t> m_activeThreadCount = {0}; // 活跃线程数量（正在干任务的线程数量）
         std::atomic<size_t> m_idleThreadCount = {0};   // 空闲线程数量
         bool m_stopping = true;                        // 是否正在停止
         bool m_autoStop = false;                       // 是否主动停止
-        int m_rootThread = 0;                          // 主线程id(use_caller)
+        // 为caller线程设计的变量
+        int m_rootThread = 0; // use_caller=false时该值为-1; use_caller=true，该值为caller线程id
     };
 
     class SchedulerSwitcher : public Noncopyable

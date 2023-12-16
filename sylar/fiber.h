@@ -70,13 +70,13 @@ namespace sylar
         void swapOut();
 
         /**
-         * @brief 将当前协程切换到执行状态
+         * @brief 将当前协程上下文保存到t_threadFiber主协程中，切换到目标协程，将当前协程切换到执行状态
          * @pre 执行的为当前线程的主协程
          */
         void call();
 
         /**
-         * @brief 将当前线程切换到后台
+         * @brief 将当前线程切换到后台，切换到主协程执行
          * @pre 执行的为该协程
          * @post 返回到线程的主协程
          *

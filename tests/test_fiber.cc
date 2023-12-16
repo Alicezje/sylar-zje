@@ -20,13 +20,16 @@ void test_fiber()
         sylar::Fiber::GetThis(); // 创建一个主协程
         SYLAR_LOG_INFO(g_fiber_logger) << "sub begin 1";
         sylar::Fiber::ptr fiber(new sylar::Fiber(run_in_fiber));
-        fiber->swapIn();
+        // fiber->swapIn();
+        fiber->call();
 
         SYLAR_LOG_INFO(g_fiber_logger) << "main after swapin 1";
-        fiber->swapIn();
+        // fiber->swapIn();
+        fiber->call();
 
         SYLAR_LOG_INFO(g_fiber_logger) << "main after swapin 2";
-        fiber->swapIn();
+        // fiber->swapIn();
+        fiber->call();
     }
     SYLAR_LOG_INFO(g_fiber_logger) << "func end";
 }

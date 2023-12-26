@@ -47,7 +47,7 @@ namespace sylar
         {
             m_name = "UNKNOW";
         }
-        // 创建线程, void* run(void* arg)
+        // 创建线程, 线程执行方法设为run, void* run(void* arg), 参数为this,内部就像参数转为Thread
         int rt = pthread_create(&m_thread, nullptr, &Thread::run, this);
         if (rt)
         {
@@ -55,6 +55,7 @@ namespace sylar
             throw std::logic_error("pthread_create error");
         }
         // 申请信号量，如果申请不到，一直等待
+        // 从信号量的值-1，如果信号量为0，则需要在这里等待
         m_semaphore.wait();
     }
 
@@ -88,6 +89,7 @@ namespace sylar
         Thread *thread = (Thread *)arg; // 转成Thread
         t_thread = thread;              // 给thread_local变量赋值
         thread->m_id = sylar::GetThreadId();
+        // 设置当前线程的名称
         pthread_setname_np(pthread_self(), thread->m_name.substr(0, 15).c_str());
 
         std::function<void()> cb;

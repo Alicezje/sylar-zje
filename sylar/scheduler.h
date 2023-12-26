@@ -108,7 +108,7 @@ namespace sylar
                 // 遍历
                 while (begin != end)
                 {
-                    need_tickle = scheduleNoLock(&*begin) || need_tickle;
+                    need_tickle = scheduleNoLock(&*begin, -1) || need_tickle;
                     ++begin;
                 }
             }

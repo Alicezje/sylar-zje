@@ -27,7 +27,7 @@ void *producer(void *arg)
     while (1)
     {
         // 当缓冲区不满时，向缓冲区内生产
-        sem_wait(&empty);
+        sem_wait(&empty); // 判断是否可以申请到empty信号量
         pthread_mutex_lock(&mutex); // 如果加锁操作放到sem_wait前面有可能会产生死锁
 
         buf.push(10);

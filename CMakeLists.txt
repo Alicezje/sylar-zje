@@ -21,6 +21,7 @@ set(SYLAR_LIB
     ${PROJECT_SOURCE_DIR}/sylar/util.cc
     ${PROJECT_SOURCE_DIR}/sylar/fiber.cc
     ${PROJECT_SOURCE_DIR}/sylar/scheduler.cc
+    ${PROJECT_SOURCE_DIR}/sylar/iomanager.cc
 )
 add_library(sylar_lib_shared SHARED ${SYLAR_LIB})
 add_library(sylar_lib_static STATIC ${SYLAR_LIB})
@@ -64,8 +65,8 @@ find_library(SYLAR_LIB sylar_lib HINTS ${PROJECT_SOURCE_DIR}/lib)
 # add_executable(test_util ${PROJECT_SOURCE_DIR}/tests/test_util.cc)
 # target_link_libraries(test_util ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
-add_executable(test_fiber ${PROJECT_SOURCE_DIR}/tests/test_fiber.cc)
-target_link_libraries(test_fiber ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+# add_executable(test_fiber ${PROJECT_SOURCE_DIR}/tests/test_fiber.cc)
+# target_link_libraries(test_fiber ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
 # add_executable(test_log_socket ${PROJECT_SOURCE_DIR}/tests/test_log_socket.cc)
 # target_link_libraries(test_log_socket ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
@@ -78,3 +79,6 @@ target_link_libraries(test_fiber ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
 
 add_executable(test_scheduler ${PROJECT_SOURCE_DIR}/tests/test_scheduler.cc)
 target_link_libraries(test_scheduler ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+
+add_executable(test_iomanager ${PROJECT_SOURCE_DIR}/tests/test_iomanager.cc)
+target_link_libraries(test_iomanager ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})

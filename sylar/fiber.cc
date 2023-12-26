@@ -85,6 +85,7 @@ namespace sylar
         // 设置协程要执行的函数
         if (!use_caller)
         {
+            // 将MainFunc函数作文m_ctx上下文的下一次执行指令
             // 不使用use_caller则执行MainFunc
             makecontext(&m_ctx, &Fiber::MainFunc, 0);
         }

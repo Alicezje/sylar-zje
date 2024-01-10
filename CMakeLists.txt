@@ -82,3 +82,6 @@ target_link_libraries(test_scheduler ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB
 
 add_executable(test_iomanager ${PROJECT_SOURCE_DIR}/tests/test_iomanager.cc)
 target_link_libraries(test_iomanager ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})
+
+add_executable(test_gdb ${PROJECT_SOURCE_DIR}/tests/test_gdb.cc)
+target_link_libraries(test_gdb ${SYLAR_LIB} ${YAML_LIB_PATH} ${PTHREAD_LIB})

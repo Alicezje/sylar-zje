@@ -5,11 +5,20 @@
 
 #include "scheduler.h"
 
+/**
+ * 将套接字设置为非阻塞状态
+ * 将套接字与回调函数绑定
+ * 进入一个基于IO多路复用的事件循环，等待事件发生
+ * 然后调用对应的回调函数
+ * 
+ */
+
 namespace sylar
 {
 
     /**
      * @brief 基于Epoll的IO协程调度器
+     * 继承于调度器Scheduler
      */
     // , public TimerManager
     class IOManager : public Scheduler
@@ -23,17 +32,18 @@ namespace sylar
          */
         enum Event
         {
-            /// 无事件
+            // 无事件            0000
             NONE = 0x0,
-            /// 读事件(EPOLLIN)
+            // 读事件(EPOLLIN)   0001
             READ = 0x1,
-            /// 写事件(EPOLLOUT)
-            WRITE = 0x4,
+            // 写事件(EPOLLOUT)  0100
+            WRITE = 0x4, // 为什么要是0x4? 0x2不行吗?
         };
 
     private:
         /**
          * @brief Socket事件上下文类
+         * 一个事件是不是只能为读事件或者写事件
          */
         struct FdContext
         {
@@ -65,20 +75,20 @@ namespace sylar
             void resetContext(EventContext &ctx);
 
             /**
-             * @brief 触发事件
+             * @brief 触发事件（将事件加入到调度队列中）
              * @param[in] event 事件类型
              */
             void triggerEvent(Event event);
 
-            /// 读事件上下文
+            // 读事件上下文
             EventContext read;
-            /// 写事件上下文
+            // 写事件上下文
             EventContext write;
-            /// 事件关联的句柄
+            // 事件关联的句柄
             int fd = 0;
-            /// 当前的事件
+            // 当前的事件
             Event events = NONE;
-            /// 事件的Mutex
+            // 事件的Mutex
             MutexType mutex;
         };
 
@@ -117,7 +127,7 @@ namespace sylar
          * @brief 取消事件
          * @param[in] fd socket句柄
          * @param[in] event 事件类型
-         * @attention 如果事件存在则触发事件
+         * @attention 如果事件存在则触发事件(既然是取消，为什么要触发该事件)
          */
         bool cancelEvent(int fd, Event event);
 
@@ -133,6 +143,7 @@ namespace sylar
         static IOManager *GetThis();
 
     protected:
+        // 父类的方法
         void tickle() override;
         bool stopping() override;
         void idle() override;
@@ -146,22 +157,23 @@ namespace sylar
 
         /**
          * @brief 判断是否可以停止
-         * @param[out] timeout 最近要出发的定时器事件间隔
+         * @param[out] timeout 最近要触发的定时器事件间隔
          * @return 返回是否可以停止
          */
         bool stopping(uint64_t &timeout);
 
     private:
-        /// epoll 文件句柄
+        // epoll 文件句柄
         int m_epfd = 0;
-        /// pipe 文件句柄
+        // pipe 文件句柄
         int m_tickleFds[2];
-        /// 当前等待执行的事件数量
+        // 当前等待执行的事件数量
         std::atomic<size_t> m_pendingEventCount = {0};
-        /// IOManager的Mutex
+        // IOManager的Mutex
         RWMutexType m_mutex;
-        /// socket事件上下文的容器
-        std::vector<FdContext *> m_fdContexts;
+
+            // socket事件上下文的容器
+            std::vector<FdContext *> m_fdContexts;
     };
 
 }
